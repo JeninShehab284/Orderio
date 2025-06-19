@@ -28,6 +28,9 @@ This is a mobile application for marketing and selling hijabs, developed using F
 | Main Screen | Sign In Screen | Login Screen | Language Selection |
 |-------------|----------------|--------------|--------------------|
 | ![Main Screen](https://github.com/JeninShehab284/Orderio/blob/master/mainscreen.png?raw=true) | ![Sign In Screen](https://github.com/JeninShehab284/Orderio/blob/master/sign.png?raw=true) | ![Login Screen](https://github.com/JeninShehab284/Orderio/blob/master/login.png?raw=true) | ![Language Selection](https://github.com/JeninShehab284/Orderio/blob/master/lang.png?raw=true) |
-| Categories Screen | Colors Screen | Silk Shawls Screen |
+| Categories Screen | Chiffon Screen | Silk Screen |
 |-------------------|---------------|--------------------|
 | ![Categories Screen](https://github.com/JeninShehab284/Orderio/blob/master/categ.png?raw=true) | ![Colors Screen](https://github.com/JeninShehab284/Orderio/blob/master/chiff.png?raw=true) | ![Silk Shawls Screen](https://github.com/JeninShehab284/Orderio/blob/master/silk.png?raw=true) |
+| Cart Screen | Order Summary | Logout and my order | My Orders |
+|-------------|---------------|---------------|-----------|
+| ![Cart Screen](https://github.com/JeninShehab284/Orderio/blob/master/cart.png?raw=true) | ![Order Summary](https://github.com/JeninShehab284/Orderio/blob/master/summery.png?raw=true) | ![Logout Screen](https://github.com/JeninShehab284/Orderio/blob/master/logout.png?raw=true) | ![My Orders](https://github.com/JeninShehab284/Orderio/blob/master/myorder.png?raw=true) |
