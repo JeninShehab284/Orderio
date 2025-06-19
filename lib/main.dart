@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:orderio/constant.dart';
 import 'log_in_screen.dart';
-import 'sign_in_screen.dart';
+import 'sign_up_screen.dart';
+import 'db_helper.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DBHelper().db;
   runApp(orderio());
 }
 
@@ -31,52 +33,52 @@ class orderio extends StatelessWidget {
               ),
             ),
             SafeArea(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    height: 350.0,
-                  ),
-                  Text(
-                    'Jenina',
-                    style: TextStyle(
-                        fontSize: 40.0,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Pacifico'),
-                  ),
-                  SizedBox(
-                    height: 5.0,
-                  ),
-                  Builder(
-                    builder: (context) {
-                      return ReuseableButton(
-                        label: 'LOGIN',
-                        icon: Icons.login,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => LoginScreen()),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                  SizedBox(
-                    height: 15.0,
-                  ),
-                  Builder(builder: (context) {
-                    return ReuseableButton(
-                        label: 'SIGNIN',
-                        icon: Icons.person,
-                        onTap: () {
-                          Navigator.push(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 100.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Jenina',
+                      style: TextStyle(
+                          fontSize: 40.0,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Pacifico'),
+                    ),
+                    SizedBox(
+                      height: 5.0,
+                    ),
+                    Builder(
+                      builder: (context) {
+                        return ReuseableButton(
+                          label: 'LOGIN',
+                          icon: Icons.login,
+                          onTap: () {
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => SigninScreen()));
-                        });
-                  })
-                ],
+                                  builder: (context) => LoginScreen()),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                    SizedBox(
+                      height: 15.0,
+                    ),
+                    Builder(builder: (context) {
+                      return ReuseableButton(
+                          label: 'SIGNUP',
+                          icon: Icons.person,
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => SignupScreen()));
+                          });
+                    })
+                  ],
+                ),
               ),
             ),
           ],
@@ -93,7 +95,6 @@ class orderio extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.only(bottom: 7.0),
         decoration: BoxDecoration(
             color: Colors.black, borderRadius: BorderRadius.circular(15.0)),
         height: 50,
@@ -110,7 +111,11 @@ class orderio extends StatelessWidget {
             ),
             Text(
               label,
-              style: kTextStyle,
+              style: TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
           ],
         ),

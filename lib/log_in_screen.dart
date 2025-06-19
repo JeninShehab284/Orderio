@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:orderio/loading.dart';
 import 'package:orderio/shopping_screen.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:local_auth/error_codes.dart' as auth_error;
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:orderio/db_helper.dart';
 
 class LoginScreen extends StatefulWidget {
   final bool clearFields;
@@ -21,26 +20,51 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+  bool _isLoading = false;
+  String _value = 'English';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBiometricSetting();
+    if (widget.clearFields) {
+      usernameController.clear();
+      passwordController.clear();
+    }
+  }
+
+  // to clear
+  @override
+  void dispose() {
+    usernameController.dispose();
+  }
+
+  void _loadBiometricSetting() async {
+    final dbHelper = DBHelper();
+    String? value = await dbHelper.getSetting('useBiometrics');
+    setState(() {
+      _enableBiometric = value == 'true';
+    });
+  }
 
   void _login() async {
     if (_formKey.currentState!.validate()) {
-      String? savedUsername = await secureStorage.read(key: 'username');
-      String? savedPassword = await secureStorage.read(key: 'password');
+      final dbHelper = DBHelper();
 
-      if (savedUsername == null || savedPassword == null) {
-        savedUsername = usernameController.text;
-        savedPassword = passwordController.text;
-      }
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('useBiometrics', _enableBiometric);
-
-      if (usernameController.text == savedUsername &&
-          passwordController.text == savedPassword) {
+      List<Map<String, dynamic>> users =
+          await dbHelper.getCustomerByUsernameAndPassword(
+        usernameController.text.trim(),
+        passwordController.text.trim(),
+      );
+      if (users.isNotEmpty) {
+        final user = users.first;
+        await dbHelper.setCurrentUser(user['id']);
+        await dbHelper.setSetting(
+            'useBiometrics', _enableBiometric ? 'true' : 'false');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Log in successfully')),
         );
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => Shopping()),
         );
@@ -52,17 +76,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    if (widget.clearFields) {
-      usernameController.clear();
-      passwordController.clear();
-    }
-  }
-
-  bool _isLoading = false;
-  String _value = 'English';
   @override
   Widget build(BuildContext context) {
     TextDirection direction =
@@ -102,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   await Future.delayed(Duration(seconds: 1));
 
-                  Navigator.pop(context); // إغلاق مؤشر التحميل
+                  Navigator.pop(context);
 
                   setState(() {
                     _value = val as String;
@@ -168,10 +181,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   activeColor: Colors.black,
                   title: Text('Remember Me'),
                   value: _enableBiometric,
-                  onChanged: (bool? value) {
+                  onChanged: (bool? value) async {
                     setState(() {
                       _enableBiometric = value ?? false;
                     });
+
+                    final dbHelper = DBHelper();
+                    await dbHelper.setSetting(
+                        'useBiometrics', _enableBiometric ? 'true' : 'false');
                   },
                   controlAffinity: ListTileControlAffinity.leading,
                 ),
@@ -210,69 +227,38 @@ class _LoginScreenState extends State<LoginScreen> {
                                 borderRadius: BorderRadius.circular(10.0),
                               )),
                           onPressed: () async {
-                            try {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Icon(
-                                  Icons.check_box,
-                                  color: Colors.green,
-                                )),
-                              );
-                              final bool didAuthenticate =
-                                  await auth.authenticate(
-                                localizedReason:
-                                    'Please authenticate to open your account.',
-                                options: const AuthenticationOptions(
-                                    useErrorDialogs: false),
-                              );
-
-                              bool canCheckBiometrics =
-                                  await auth.canCheckBiometrics;
-                              List<BiometricType> availableBiometrics =
-                                  await auth.getAvailableBiometrics();
-
-                              if (!canCheckBiometrics ||
-                                  availableBiometrics.isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text(
-                                          'لا توجد بصمة مسجّلة على الجهاز')),
-                                );
-                                return;
-                              }
-                              final bool isDeviceSupported =
-                                  await auth.isDeviceSupported();
-                              if (!canCheckBiometrics || !isDeviceSupported) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Not supported')),
-                                );
-                                return;
-                              }
-                              if (didAuthenticate) {
-                                String? savedUsername =
-                                    await secureStorage.read(key: 'username');
-                                String? savedPassword =
-                                    await secureStorage.read(key: 'password');
-                                if (savedUsername != null &&
-                                    savedPassword != null) {
-                                  usernameController.text = savedUsername;
-                                  passwordController.text = savedPassword;
+                            final bool didAuthenticate =
+                                await auth.authenticate(
+                              localizedReason:
+                                  'Please authenticate to open your account.',
+                              options: const AuthenticationOptions(
+                                  useErrorDialogs: false),
+                            );
+                            if (didAuthenticate) {
+                              final dbHelper = DBHelper();
+                              String? biometricSetting =
+                                  await dbHelper.getSetting('useBiometrics');
+                              if (biometricSetting == 'true') {
+                                Map<String, dynamic>? currentUser =
+                                    await dbHelper.getCurrentUser();
+                                if (currentUser != null) {
+                                  usernameController.text =
+                                      currentUser['username'];
+                                  passwordController.text =
+                                      currentUser['password'];
                                   _login();
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content:
+                                            Text('No activated user found.')),
+                                  );
                                 }
-                              }
-                            } on PlatformException catch (e) {
-                              if (e.code == 'NotAvailable' ||
-                                  e.code == 'SecurityCredentialsNotAvailable') {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text(
-                                          'لا توجد بيانات بصمة أو أمان مفعّلة على الجهاز')),
-                                );
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                       content: Text(
-                                          'خطأ أثناء التحقق: ${e.message}')),
+                                          'Please enable the fingerprint option first.')),
                                 );
                               }
                             }
