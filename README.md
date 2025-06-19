@@ -2,15 +2,24 @@
 
 A new Flutter project.
 
-## Getting Started
+# Shawl Selling App - Flutter
 
-This project is a starting point for a Flutter application.
+This is a mobile application for marketing and selling hijabs, developed using Flutter to provide users with an easy and smooth shopping experience.
 
-A few resources to get you started if this is your first Flutter project:
+## Features
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Home Page:** Allows users to either log in or register as a new customer.
+- **User Registration & Login:** New customers can register, then log in to access the app.
+- **Language Support:** Users can switch the app language to Arabic.
+- **Categories Page:** Displays different types of shawls. Users can tap on a category to view available colors.
+- **Product Selection:** Users choose the hijabs they want to order from the available colors.
+- **Shopping Cart:** Selected hijabs appear in the cart, where users can increase or decrease quantities, or remove items.
+- **Order Confirmation:** After confirming the cart, users are taken to a summary page showing their personal information and order details.
+- **Orders Page:** Users can view all their past orders.
+- **Logout:** Users can securely log out from the app.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Technologies Used
+
+- Dart and Flutter framework for cross-platform app development (Android & iOS).
+- SQLite for local data storage.
+- GitHub for version control and project sharing.
